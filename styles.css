@@ -89,6 +89,8 @@ main {
   background-color: #fff;
   border: 1px solid #ccc;
   position: relative; /* Make it relative to position the date number */
+  text-align: center;
+  font-weight: bold;
 }
 .calendar-day::before {
   content: attr(data-date);
@@ -101,6 +103,7 @@ main {
 .calendar-day.current-day {
   background-color: #cfe3ff; /* Highlight for the current day */
 }
+
 .calendar-day.saturday,
 .calendar-day.sunday {
   background-color: #f0f0f0; /* Light grey for weekends */

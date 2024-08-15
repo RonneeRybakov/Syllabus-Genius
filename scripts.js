@@ -11,7 +11,7 @@ document.addEventListener("DOMContentLoaded", () => {
     calendarElement.innerHTML = "";
     const month = date.getMonth();
     const year = date.getFullYear();
-    const today = new Date();
+    const today = currentDate;
 
     // Set the month and year in the header
     monthYearElement.textContent = `${date.toLocaleString("default", {
@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Add day headers
     const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
     dayNames.forEach((dayName) => {
       const dayHeader = document.createElement("div");
       dayHeader.className = "calendar-day";
