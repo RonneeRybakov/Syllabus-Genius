@@ -111,6 +111,11 @@ document.addEventListener("DOMContentLoaded", () => {
         const dayHeader = document.createElement("div");
         dayHeader.className = "calendar-day calendar-day-header";
         dayHeader.textContent = `${dayName} ${new Date(startOfWeek).getDate()}`;
+        if (
+          new Date().toDateString() === new Date(startOfWeek).toDateString()
+        ) {
+          dayHeader.classList.add("current-day"); // Highlight current day in weekly view
+        }
         startOfWeek.setDate(startOfWeek.getDate() + 1); //Move to the next day
         calendarElement.appendChild(dayHeader);
       });

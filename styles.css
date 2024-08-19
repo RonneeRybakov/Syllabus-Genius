@@ -58,17 +58,51 @@ main {
 }
 
 .calendar-header button {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 20px;
+  background-color: #1f77ae; /* Blue background for a bold look */
+  border: none; /* Remove border for a cleaner appearance */
+  border-radius: 50%; /* Circular buttons */
+  width: 40px; /* Fixed width */
+  height: 40px; /* Fixed height */
+  color: white; /* White text color */
+  font-size: 18px; /* Larger font size for clarity */
   cursor: pointer;
+  display: flex; /* Center the content */
+  align-items: center; /* Center the content vertically */
+  justify-content: center; /* Center the content horizontally */
+  transition: background-color 0.3s, transform 0.2s; /* Smooth transitions for hover effects */
+  font-weight: bold; /* Bold text for emphasis */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
 }
-
+.calendar-header button:hover {
+  background-color: #155a8a; /* Darker blue on hover */
+  transform: scale(1.1); /* Slightly enlarge button on hover */
+}
+.calendar-header button:active {
+  background-color: #003d66; /* Even darker blue for active state */
+  transform: scale(0.95); /* Slightly shrink button on click */
+}
 .view-selector {
   display: flex;
   justify-content: center;
   padding: 10px;
+}
+#viewSelector {
+  background-color: #ffffff;
+  border: 2px solid #1f77ae; /* Matching the calendar header color */
+  border-radius: 5px; /* Rounded corners */
+  padding: 5px 10px; /* Padding inside the dropdown */
+  font-size: 14px; /* Larger text for better readability */
+  font-family: Arial, sans-serif; /* Match the rest of your text */
+  color: #333; /* Dark text color */
+  cursor: pointer;
+  transition: background-color 0.3s, border-color 0.3s; /* Smooth transition for hover effects */
+}
+#viewSelector:hover,
+#viewSelector:focus {
+  background-color: #ebe5e5; /* Light background color on hover/focus */
+  border-color: #0056b3; /* Darker border color on hover/focus */
+  outline: none; /* Remove default outline */
+  transform: scale(1.05); /* Slightly enlarge button on hover */
 }
 
 .view-selector label {
