@@ -92,6 +92,41 @@ main {
   text-align: center;
   font-weight: bold;
 }
+#calendar {
+  overflow-y: auto;
+  max-height: 600px; /* Adjust the height as needed */
+}
+.calendar-day-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff; /* Revert to white background */
+  color: #333; /* Default text color */
+  text-align: center;
+  font-weight: bold;
+  padding: 3px 5px; /* Reduced padding for a smaller header */
+  border: 3px solid #9ca1a4; /* Thick blue border around day headers */
+  box-sizing: border-box; /* Ensure padding and border are included in height */
+  font-size: 16px; /* Smaller font size to reduce space */
+  height: 50px; /* Set a fixed height for the header row */
+  line-height: 50px; /* Center text vertically */
+}
+
+.calendar-time-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: #fff; /* Matches your design */
+}
+.time-slot {
+  height: 61px; /* Ensure this matches your JavaScript calculation */
+  line-height: 61px; /* Center text vertically */
+  border-bottom: 1px solid #ddd; /* Optional styling */
+  display: flex; /* Center content horizontally */
+  align-items: center; /* Center content vertically */
+  padding: 0 10px; /* Padding for better spacing */
+}
+
 .calendar-day::before {
   content: attr(data-date);
   position: absolute;

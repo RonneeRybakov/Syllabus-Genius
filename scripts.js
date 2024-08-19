@@ -1,15 +1,22 @@
 document.addEventListener("DOMContentLoaded", () => {
-  //Get refrences to the calendar elements
+  // Get references to the calendar elements
   const calendarElement = document.getElementById("calendar");
   const monthYearElement = document.getElementById("monthYear");
   const prevButton = document.getElementById("prevButton");
   const nextButton = document.getElementById("nextButton");
   const viewSelector = document.getElementById("viewSelector");
 
-  //Initialize the current date
+  // Initialize the current date
   let currentDate = new Date();
 
-  //Function to render the calendar(monthly/weekly view)
+  // Function to format time in 12-hour format with AM/PM
+  function formatTime(hour) {
+    const period = hour >= 12 ? "PM" : "AM";
+    const formattedHour = hour % 12 || 12; // Convert 0 to 12 for midnight
+    return `${formattedHour}${period}`;
+  }
+
+  // Function to render the calendar based on the view (monthly or weekly)
   function renderCalendar(date, view = "monthly") {
     calendarElement.innerHTML = "";
     const month = date.getMonth();
@@ -17,16 +24,16 @@ document.addEventListener("DOMContentLoaded", () => {
     const today = currentDate;
 
     if (view === "monthly") {
-      // Set the month and year in the header for monthly view
+      // Display the month and year at the top
       monthYearElement.textContent = `${date.toLocaleString("default", {
         month: "long",
       })} ${year}`;
 
-      // Get the first and last days of the month
+      // Get the first and last day of the month
       const firstDayOfMonth = new Date(year, month, 1);
       const lastDayOfMonth = new Date(year, month + 1, 0);
 
-      // Add day headers
+      // Create headers for the days of the week
       const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       dayNames.forEach((dayName) => {
         const dayHeader = document.createElement("div");
@@ -40,8 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let i = 0; i < 6; i++) {
         //Up to 6 rows (weeks) in a month
         let isRowEmpty = true; // Track if the row is empty
-
-        const rowFragment = document.createDocumentFragment(); // Create a fragment to append cells
+        const rowFragment = document.createDocumentFragment(); // Create fragment to append cells
 
         for (let j = 0; j < 7; j++) {
           //7 columns (days) per row
@@ -49,8 +55,8 @@ document.addEventListener("DOMContentLoaded", () => {
           dayCell.className = "calendar-day";
 
           if (
-            (i === 0 && j < firstDayOfMonth.getDay()) || //Empty cells before the 1st of the month
-            day > lastDayOfMonth.getDate() //Empty cells afrer the last day of the month
+            (i === 0 && j < firstDayOfMonth.getDay()) || // Empty cells before the 1st of the month
+            day > lastDayOfMonth.getDate() // Empty cells after the last day of the month
           ) {
             dayCell.className += " empty"; //Add "empty" class to these cells
           } else {
@@ -73,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
               dayCell.classList.add("saturday");
             }
 
-            day++; //Move to the next day
+            day++;
           }
 
           rowFragment.appendChild(dayCell); //Add the cell to the fragment
@@ -92,13 +98,18 @@ document.addEventListener("DOMContentLoaded", () => {
       )}`;
 
       const startOfWeek = new Date(date);
-      startOfWeek.setDate(date.getDate() - date.getDay()); //This sets it to sunday
-      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      startOfWeek.setDate(date.getDate() - date.getDay()); // Sets it to Sunday
 
-      //Day headers with dates (Sun 1, Mon 2...)
+      // Create the time header
+      const timeHeader = document.createElement("div");
+      timeHeader.className = "calendar-time-header";
+      calendarElement.appendChild(timeHeader);
+
+      // Create headers for the days of the week with dates (Sun 1, Mon 2...)
+      const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
       dayNames.forEach((dayName, index) => {
         const dayHeader = document.createElement("div");
-        dayHeader.className = "calendar-day";
+        dayHeader.className = "calendar-day calendar-day-header";
         dayHeader.textContent = `${dayName} ${new Date(startOfWeek).getDate()}`;
         startOfWeek.setDate(startOfWeek.getDate() + 1); //Move to the next day
         calendarElement.appendChild(dayHeader);
@@ -106,17 +117,36 @@ document.addEventListener("DOMContentLoaded", () => {
 
       //Hourly time slots
       for (let hour = 0; hour < 24; hour++) {
-        //24 hours in a day
         const rowFragment = document.createDocumentFragment();
+
+        // Create a time slot header
+        const timeSlot = document.createElement("div");
+        timeSlot.className = "time-slot";
+        timeSlot.textContent = formatTime(hour);
+        rowFragment.appendChild(timeSlot);
+
+        // Create cells for each day of the week
         for (let j = 0; j < 7; j++) {
-          //7 days a week
           const dayCell = document.createElement("div");
           dayCell.className = "calendar-day";
-          dayCell.textContent = `${hour}:00`; //Display the hour
-          rowFragment.appendChild(dayCell); //Add the cell to the fragment
+          rowFragment.appendChild(dayCell);
         }
-        calendarElement.appendChild(rowFragment); //Append the row to the calendar
+
+        calendarElement.appendChild(rowFragment);
       }
+
+      // Manually opens the weekly view to 8 AM cell
+      setTimeout(() => {
+        const eightAMCellIndex = 6; // idk how it worked but 6 makes the calendar open at 8am
+        const timeSlots = document.querySelectorAll(".time-slot");
+        if (timeSlots.length > eightAMCellIndex) {
+          const eightAMCell = timeSlots[eightAMCellIndex];
+          calendarElement.scrollTop =
+            eightAMCell.offsetTop -
+            calendarElement.offsetHeight / 2 +
+            eightAMCell.offsetHeight / 2;
+        }
+      }, 10); // Adjust delay if needed
     }
   }
 
@@ -145,8 +175,9 @@ document.addEventListener("DOMContentLoaded", () => {
       renderCalendar(currentDate, "monthly"); //Render monthly view
     } else {
       //Set up calendar grid for weekly view
+
       document.getElementById("calendar").style.gridTemplateColumns =
-        "repeat(7, 1fr)";
+        "auto repeat(7, 1fr)";
       renderCalendar(currentDate, "weekly"); //Render weekly view
     }
   });
