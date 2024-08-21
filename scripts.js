@@ -8,6 +8,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initialize the current date
   let currentDate = new Date();
+  const events = []; //array to store events
 
   // Function to format time in 12-hour format with AM/PM
   function formatTime(hour) {
@@ -134,6 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
         for (let j = 0; j < 7; j++) {
           const dayCell = document.createElement("div");
           dayCell.className = "calendar-day";
+
+          //click event listener to each day cell for adding events
+          dayCell.addEventListener("click", () => {
+            openEventForm(date, j, hour);
+          });
+
           rowFragment.appendChild(dayCell);
         }
 
@@ -165,6 +172,53 @@ document.addEventListener("DOMContentLoaded", () => {
       currentDate.setDate(currentDate.getDate() + step * 7);
     }
     renderCalendar(currentDate, viewSelector.value); //Re-render the calendar
+  }
+  // Function to handle navigation between months or weeks
+  function handleNavigation(step) {
+    if (viewSelector.value === "monthly") {
+      //Adjust month by step (-1 or +1) for monthly view
+      currentDate.setMonth(currentDate.getMonth() + step);
+    } else {
+      //Adjust the date by 7 days (1 week) for weekly view
+      currentDate.setDate(currentDate.getDate() + step * 7);
+    }
+    renderCalendar(currentDate, viewSelector.value); //Re-render the calendar
+  }
+
+  // Function to open the event form
+  function openEventForm(date, dayIndex, hour) {
+    const eventTitle = prompt("Enter the event title:");
+    if (eventTitle) {
+      const eventDate = new Date(date);
+      eventDate.setDate(date.getDate() - date.getDay() + dayIndex); // Set the date to the specific day
+      eventDate.setHours(hour); // Set the hour for the event
+
+      // Save event details (you may want to save these in a more permanent way)
+      const event = {
+        title: eventTitle,
+        date: eventDate,
+      };
+
+      // Display the event on the calendar
+      displayEvent(event, dayIndex, hour);
+    }
+  }
+
+  // Function to display events on the calendar
+  function displayEvent(event, dayIndex, hour) {
+    events.push(event);
+
+    // Find the correct cell to display the event
+    const cells = document.querySelectorAll(".calendar-day");
+    const index = dayIndex + hour * 7; // Calculate index based on day and hour
+
+    if (cells[index]) {
+      const eventElement = document.createElement("div");
+      eventElement.className = "calendar-event";
+      eventElement.textContent = event.title;
+
+      cells[index].appendChild(eventElement);
+    }
   }
 
   //Event listeners for prev and next buttons
