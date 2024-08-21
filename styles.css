@@ -210,6 +210,8 @@ main {
   padding: 5px;
   border-radius: 5px;
   font-size: 12px;
+  display: flex;
+  flex-direction: column;
 }
 
 .event-form {
@@ -236,4 +238,47 @@ footer {
   padding: 10px;
   width: 100%;
   position: relative;
+}
+.event-form-container {
+  position: absolute;
+  border: 1px solid #ccc;
+  background: #fff;
+  padding: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000; /* Ensure the form appears above other content */
+}
+
+.event-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Positions buttons on opposite sides */
+  margin-bottom: 10px;
+}
+
+.add-button {
+  background-color: #4caf50; /* Green */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #f44336; /* Red */
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+.cancel-button:hover {
+  background-color: #d32f2f; /* Darker red */
+}
+
+.add-button:hover {
+  background-color: #45a049; /* Darker green */
 }
