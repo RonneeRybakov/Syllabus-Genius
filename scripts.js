@@ -124,7 +124,7 @@ document.addEventListener("DOMContentLoaded", () => {
       for (let hour = 0; hour < 24; hour++) {
         const rowFragment = document.createDocumentFragment();
 
-        // Create a time slot header
+        // Create a time slot cell header which is the time basically
         const timeSlot = document.createElement("div");
         timeSlot.className = "time-slot";
         timeSlot.textContent = formatTime(hour);
@@ -180,7 +180,6 @@ document.addEventListener("DOMContentLoaded", () => {
       renderCalendar(currentDate, "monthly"); //Render monthly view
     } else {
       //Set up calendar grid for weekly view
-
       document.getElementById("calendar").style.gridTemplateColumns =
         "auto repeat(7, 1fr)";
       renderCalendar(currentDate, "weekly"); //Render weekly view
