@@ -149,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Manually opens the weekly view to 8 AM cell
       setTimeout(() => {
-        const eightAMCellIndex = 6; // idk how it worked but 6 makes the calendar open at 8am
+        const eightAMCellIndex = 7; // index starts at 0
         const timeSlots = document.querySelectorAll(".time-slot");
         if (timeSlots.length > eightAMCellIndex) {
           const eightAMCell = timeSlots[eightAMCellIndex];
@@ -176,7 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let eventFormContainer = null; // Track the currently open event form
 
-  function openEventForm(date, dayIndex, hour) {
+  function openEventForm(date, dayIndex, hour, eventToEdit = null) {
     // Close the existing form if it exists
     if (eventFormContainer) {
       document.body.removeChild(eventFormContainer);
@@ -197,37 +197,56 @@ document.addEventListener("DOMContentLoaded", () => {
     const titleInput = document.createElement("input");
     titleInput.type = "text";
     titleInput.required = true;
+    titleInput.value = eventToEdit ? eventToEdit.title : ""; // Prefill if editing
     form.appendChild(titleLabel);
     form.appendChild(titleInput);
 
     // Create input for start time
     const startTimeLabel = document.createElement("label");
-    startTimeLabel.textContent = "Start Time (0-23):";
-    const startTimeInput = document.createElement("input");
-    startTimeInput.type = "number";
-    startTimeInput.min = "0";
-    startTimeInput.max = "23";
-    startTimeInput.required = true;
+    startTimeLabel.textContent = "Start Time:";
+    const startHourInput = document.createElement("input");
+    startHourInput.type = "number";
+    startHourInput.min = "1";
+    startHourInput.max = "12";
+    startHourInput.required = true;
+    startHourInput.value = eventToEdit ? eventToEdit.startTime : ""; // Prefill if editing
+    const startPeriodInput = document.createElement("select");
+    const amOption = document.createElement("option");
+    amOption.value = "AM";
+    amOption.textContent = "AM";
+    const pmOption = document.createElement("option");
+    pmOption.value = "PM";
+    pmOption.textContent = "PM";
+    startPeriodInput.appendChild(amOption);
+    startPeriodInput.appendChild(pmOption);
+    startPeriodInput.required = true;
     form.appendChild(startTimeLabel);
-    form.appendChild(startTimeInput);
+    form.appendChild(startHourInput);
+    form.appendChild(startPeriodInput);
 
     // Create input for end time
     const endTimeLabel = document.createElement("label");
-    endTimeLabel.textContent = "End Time (0-23):";
-    const endTimeInput = document.createElement("input");
-    endTimeInput.type = "number";
-    endTimeInput.min = "0";
-    endTimeInput.max = "23";
-    endTimeInput.required = true;
+    endTimeLabel.textContent = "End Time:";
+    const endHourInput = document.createElement("input");
+    endHourInput.type = "number";
+    endHourInput.min = "1";
+    endHourInput.max = "12";
+    endHourInput.required = true;
+    endHourInput.value = eventToEdit ? eventToEdit.endTime : ""; // Prefill if editing
+    const endPeriodInput = document.createElement("select");
+    endPeriodInput.appendChild(amOption.cloneNode(true)); // Clone AM option
+    endPeriodInput.appendChild(pmOption.cloneNode(true)); // Clone PM option
+    endPeriodInput.required = true;
     form.appendChild(endTimeLabel);
-    form.appendChild(endTimeInput);
+    form.appendChild(endHourInput);
+    form.appendChild(endPeriodInput);
 
     // Create a color picker for event color
     const colorLabel = document.createElement("label");
     colorLabel.textContent = "Event Color:";
     const colorInput = document.createElement("input");
     colorInput.type = "color";
-    colorInput.value = "#ff0000"; // Default color (red)
+    colorInput.value = eventToEdit ? eventToEdit.color : "#ff0000"; // Default color or prefill if editing
     form.appendChild(colorLabel);
     form.appendChild(colorInput);
 
@@ -246,10 +265,10 @@ document.addEventListener("DOMContentLoaded", () => {
     eventFormContainer.appendChild(form);
     document.body.appendChild(eventFormContainer);
 
-    // Add Event button
+    // Add Submit button
     const addButton = document.createElement("button");
     addButton.type = "submit";
-    addButton.textContent = "Add Event";
+    addButton.textContent = eventToEdit ? "Save Changes" : "Add Event"; // Change button text if editing
     addButton.className = "add-button";
     buttonContainer.appendChild(addButton);
 
@@ -264,9 +283,16 @@ document.addEventListener("DOMContentLoaded", () => {
       e.preventDefault();
 
       const eventTitle = titleInput.value;
-      const startTime = parseInt(startTimeInput.value);
-      const endTime = parseInt(endTimeInput.value);
+      const startHour = parseInt(startHourInput.value);
+      const startPeriod = startPeriodInput.value;
+      const endHour = parseInt(endHourInput.value);
+      const endPeriod = endPeriodInput.value;
       const eventColor = colorInput.value;
+
+      // Convert 12-hour time to 24-hour time
+      const startTime =
+        startPeriod === "PM" ? (startHour % 12) + 12 : startHour % 12;
+      const endTime = endPeriod === "PM" ? (endHour % 12) + 12 : endHour % 12;
 
       if (
         isNaN(startTime) ||
@@ -279,43 +305,125 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      for (let h = startTime; h < endTime; h++) {
-        const eventDate = new Date(date);
-        eventDate.setDate(date.getDate() - date.getDay() + dayIndex);
-        eventDate.setHours(h);
-
+      if (eventToEdit) {
+        eventToEdit.title = eventTitle;
+        eventToEdit.startTime = startTime;
+        eventToEdit.endTime = endTime;
+        eventToEdit.color = eventColor;
+        updateEventDisplay(eventToEdit);
+      } else {
         const event = {
           title: eventTitle,
-          date: eventDate,
+          date: date,
           startTime,
           endTime,
           color: eventColor,
+          startPeriod,
+          endPeriod,
         };
-
-        displayEvent(event, dayIndex, h);
+        displayEvent(event, dayIndex, hour);
       }
 
-      // Remove the form after submission
       document.body.removeChild(eventFormContainer);
-      eventFormContainer = null; // Reset the form container tracker
+      eventFormContainer = null;
     });
 
-    // Handle cancel button click
     cancelButton.addEventListener("click", () => {
       document.body.removeChild(eventFormContainer);
-      eventFormContainer = null; // Reset the form container tracker
+      eventFormContainer = null;
     });
+  }
+
+  function updateEventDisplay(updatedEvent) {
+    const dayCells = document.querySelectorAll(".calendar-day");
+
+    // Clear old event highlights
+    dayCells.forEach((cell) => {
+      const eventElement = cell.querySelector(".calendar-event");
+      if (eventElement && eventElement.textContent === updatedEvent.title) {
+        cell.style.backgroundColor = ""; // Reset background color
+        cell.style.color = ""; // Reset text color
+        cell.classList.remove("highlighted-event-cell"); // Remove highlight class
+        cell.removeChild(eventElement); // Remove the old event element
+      }
+    });
+
+    // Add updated event
+    addEventToCalendar(updatedEvent);
+  }
+
+  function addEventToCalendar(event) {
+    console.log("Event for Adding:", event); // Log the event object
+
+    const { startTime, endTime, color, title, date } = event;
+    const dayCells = document.querySelectorAll(".calendar-day");
+    const dayIndex = date.getDay();
+
+    // Calculate start and end indices using the adjusted function
+    const startIndex = calculateStartIndex(dayIndex, startTime);
+    const endIndex = calculateStartIndex(dayIndex, endTime);
+
+    console.log(`Adding event: ${title}`);
+    console.log(`Start Time: ${startTime}`);
+    console.log(`End Time: ${endTime}`);
+    console.log(`Day Index: ${dayIndex}`);
+    console.log(`Start Index: ${startIndex}`);
+    console.log(`End Index: ${endIndex}`);
+
+    // Add title to start index cell
+    const startCell = dayCells[startIndex];
+    if (startCell) {
+      const eventElement = document.createElement("div");
+      eventElement.className = "calendar-event";
+      eventElement.textContent = title;
+      eventElement.style.backgroundColor = color;
+      eventElement.style.color = "#fff";
+      startCell.appendChild(eventElement);
+    }
+
+    // Highlight cells for event duration
+    for (let i = startIndex; i <= endIndex; i++) {
+      const cell = dayCells[i];
+      if (cell) {
+        cell.style.backgroundColor = color;
+        cell.classList.add("highlighted-event-cell");
+      }
+    }
   }
 
   // Function to display events on the calendar
   function displayEvent(event, dayIndex, hour) {
     events.push(event);
 
+    // Convert event start time to 24-hour format
+    let startHour24 = event.startTime;
+    if (event.startTimePeriod === "PM" && startHour24 !== 12) {
+      startHour24 += 12; // Convert PM hours to 24-hour format, except for 12 PM
+    } else if (event.startTimePeriod === "AM" && startHour24 === 12) {
+      startHour24 = 0; // Convert 12 AM to 0 hour in 24-hour format
+    }
+
+    // Convert event end time to 24-hour format
+    let endHour24 = event.endTime;
+    if (event.endTimePeriod === "PM" && endHour24 !== 12) {
+      endHour24 += 12; // Convert PM hours to 24-hour format, except for 12 PM
+    } else if (event.endTimePeriod === "AM" && endHour24 === 12) {
+      endHour24 = 0; // Convert 12 AM to 0 hour in 24-hour format
+    }
+
     // Find the cells to highlight
     const cells = document.querySelectorAll(".calendar-day");
-    const startIndex = dayIndex + (hour + 1) * 7; // Adjusted index for the correct row
 
-    // Display event title only in the starting cell
+    // Calculate startIndex for the event title
+    const startIndex = dayIndex + (startHour24 + 1) * 7;
+
+    // Ensure the startIndex is within bounds
+    if (startIndex < 0 || startIndex >= cells.length) {
+      console.error(`Invalid startIndex: ${startIndex}`);
+      return;
+    }
+
+    // Place the title and buttons in the correct starting cell
     if (cells[startIndex]) {
       const eventElement = document.createElement("div");
       eventElement.className = "calendar-event";
@@ -325,7 +433,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Add click event listener to open edit form
       eventElement.addEventListener("click", () => {
-        openEditForm(event, startIndex, dayIndex, hour);
+        openEventForm(event.date, dayIndex, startHour24, event);
       });
 
       // Add delete button to the event element
@@ -343,155 +451,28 @@ document.addEventListener("DOMContentLoaded", () => {
       editButton.className = "event-edit-button";
       editButton.addEventListener("click", (e) => {
         e.stopPropagation();
-        openEditForm(event, startIndex, dayIndex, hour);
+        openEventForm(event.date, dayIndex, startHour24, event);
       });
 
       // Append buttons to the event element
       eventElement.appendChild(deleteButton);
       eventElement.appendChild(editButton);
 
-      // Add title only to the starting block
+      // Add title to the correct starting block
       cells[startIndex].appendChild(eventElement);
-
-      // Highlight all relevant cells without titles
-      for (let h = event.startTime; h < event.endTime; h++) {
-        const highlightIndex = dayIndex + (h + 1) * 7;
-        if (cells[highlightIndex]) {
-          cells[highlightIndex].style.backgroundColor = event.color;
-          cells[highlightIndex].style.color = "#fff"; // Optional: change text color for better visibility
-
-          // Optionally, you might want to add some visual indication that these cells are part of the event
-          // For example, you can add a class to highlight these cells
-          cells[highlightIndex].classList.add("highlighted-event-cell");
-        }
-      }
-    }
-  }
-
-  function openEditForm(event, startIndex, dayIndex, hour) {
-    // Close the existing form if it exists
-    if (eventFormContainer) {
-      document.body.removeChild(eventFormContainer);
-      eventFormContainer = null;
     }
 
-    // Create the form container
-    eventFormContainer = document.createElement("div");
-    eventFormContainer.className = "event-form-container";
+    // Highlight all relevant cells based on start and end times
+    for (let h = startHour24; h < endHour24; h++) {
+      const highlightIndex = dayIndex + (h + 1) * 7;
 
-    // Create the form
-    const form = document.createElement("form");
-    form.className = "event-form";
-
-    // Create input for event title
-    const titleLabel = document.createElement("label");
-    titleLabel.textContent = "Event Title:";
-    const titleInput = document.createElement("input");
-    titleInput.type = "text";
-    titleInput.value = event.title; // Pre-fill with current title
-    titleInput.required = true;
-    form.appendChild(titleLabel);
-    form.appendChild(titleInput);
-
-    // Create input for start time
-    const startTimeLabel = document.createElement("label");
-    startTimeLabel.textContent = "Start Time (0-23):";
-    const startTimeInput = document.createElement("input");
-    startTimeInput.type = "number";
-    startTimeInput.min = "0";
-    startTimeInput.max = "23";
-    startTimeInput.value = event.startTime; // Pre-fill with current start time
-    startTimeInput.required = true;
-    form.appendChild(startTimeLabel);
-    form.appendChild(startTimeInput);
-
-    // Create input for end time
-    const endTimeLabel = document.createElement("label");
-    endTimeLabel.textContent = "End Time (0-23):";
-    const endTimeInput = document.createElement("input");
-    endTimeInput.type = "number";
-    endTimeInput.min = "0";
-    endTimeInput.max = "23";
-    endTimeInput.value = event.endTime; // Pre-fill with current end time
-    endTimeInput.required = true;
-    form.appendChild(endTimeLabel);
-    form.appendChild(endTimeInput);
-
-    // Create a color picker for event color
-    const colorLabel = document.createElement("label");
-    colorLabel.textContent = "Event Color:";
-    const colorInput = document.createElement("input");
-    colorInput.type = "color";
-    colorInput.value = event.color; // Pre-fill with current color
-    form.appendChild(colorLabel);
-    form.appendChild(colorInput);
-
-    // Create buttons for submit and cancel
-    const buttonContainer = document.createElement("div");
-    buttonContainer.className = "button-container";
-
-    // Cancel button
-    const cancelButton = document.createElement("button");
-    cancelButton.type = "button";
-    cancelButton.textContent = "Cancel";
-    cancelButton.className = "cancel-button";
-    buttonContainer.appendChild(cancelButton);
-
-    // Update button
-    const updateButton = document.createElement("button");
-    updateButton.type = "submit";
-    updateButton.textContent = "Update Event";
-    updateButton.className = "update-button";
-    buttonContainer.appendChild(updateButton);
-
-    form.appendChild(buttonContainer);
-    eventFormContainer.appendChild(form);
-    document.body.appendChild(eventFormContainer);
-
-    // Position the form near the clicked cell
-    eventFormContainer.style.position = "absolute";
-    eventFormContainer.style.left = `${event.clientX}px`;
-    eventFormContainer.style.top = `${event.clientY}px`;
-
-    // Handle form submission
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-
-      const eventTitle = titleInput.value;
-      const startTime = parseInt(startTimeInput.value);
-      const endTime = parseInt(endTimeInput.value);
-      const eventColor = colorInput.value;
-
-      if (
-        isNaN(startTime) ||
-        isNaN(endTime) ||
-        startTime < 0 ||
-        endTime > 23 ||
-        startTime >= endTime
-      ) {
-        alert("Invalid time range. Please try again.");
-        return;
+      // Ensure the highlightIndex is within bounds
+      if (highlightIndex >= 0 && highlightIndex < cells.length) {
+        cells[highlightIndex].style.backgroundColor = event.color;
+        cells[highlightIndex].style.color = "#fff"; // Optional: change text color for better visibility
+        cells[highlightIndex].classList.add("highlighted-event-cell");
       }
-
-      // Update event properties
-      event.title = eventTitle;
-      event.startTime = startTime;
-      event.endTime = endTime;
-      event.color = eventColor;
-
-      // Re-render the calendar to reflect changes
-      renderCalendar(currentDate, viewSelector.value);
-
-      // Remove the form after submission
-      document.body.removeChild(eventFormContainer);
-      eventFormContainer = null; // Reset the form container tracker
-    });
-
-    // Handle cancel button click
-    cancelButton.addEventListener("click", () => {
-      document.body.removeChild(eventFormContainer);
-      eventFormContainer = null; // Reset the form container tracker
-    });
+    }
   }
 
   function deleteEvent(eventToDelete) {

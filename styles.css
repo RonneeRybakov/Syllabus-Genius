@@ -81,6 +81,7 @@ main {
   background-color: #003d66; /* Even darker blue for active state */
   transform: scale(0.95); /* Slightly shrink button on click */
 }
+
 .view-selector {
   display: flex;
   justify-content: center;
@@ -159,6 +160,7 @@ main {
   display: flex; /* Center content horizontally */
   align-items: center; /* Center content vertically */
   padding: 0 10px; /* Padding for better spacing */
+  position: relative; /* Position relative for absolute positioning of buttons */
 }
 
 .calendar-day::before {
@@ -183,10 +185,10 @@ main {
 }
 
 .calendar-day .event {
-  background-color: #ffeb3b;
-  padding: 5px;
-  border-radius: 5px;
-  font-size: 12px;
+  position: absolute; /* This should be correct */
+  width: 100%; /* Make sure it covers the full width of the cell */
+  box-sizing: border-box; /* Include padding and border in the width */
+  z-index: 10; /* Ensure it appears above other content */
 }
 
 .empty {
@@ -239,6 +241,7 @@ footer {
   width: 100%;
   position: relative;
 }
+
 .event-form-container {
   position: absolute;
   border: 1px solid #ccc;
